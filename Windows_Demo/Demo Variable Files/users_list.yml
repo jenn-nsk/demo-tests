@@ -1,0 +1,10 @@
+---
+- users:
+  - name: dave
+    job: technology
+
+  - name: allie
+    job: consulting
+
+  - name: donte
+    job: consulting
