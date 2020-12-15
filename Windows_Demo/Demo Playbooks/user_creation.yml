@@ -1,5 +1,5 @@
 - name: create users
-  hosts: all
+  hosts: windows
   become: true
   vars_files:
     - users_list.yml
@@ -9,17 +9,19 @@
       group:
         name: Admin
         state: present
-    - name: create Developer group
+
+    - name: create Consulatant group
       group:
         name: "{{ item.job }}"
         state: present
-      when: inventory_hostname in groups.dev and item.job == developer
+      when: inventory_hostname in groups.prod and item.job == consulting
       loop: "{{ users }}"
-    - name: create Manager group
+
+    - name: create Technology group
       group:
         name: "{{ item.job }}"
         state: present
-      when: inventory_hostname in groups.prod and item.job == manager
+      when: inventory_hostname in groups.dev and item.job == Technology
       loop: "{{ users }}"
     - name: create users
       user:
@@ -31,6 +33,7 @@
         shell: /bin/bash
       when: inventory_hostname in groups.prod
       loop: "{{ users }}"
+
     - name: create users
       user:
         name: "{{ item.name }}"
