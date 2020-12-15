@@ -1,5 +1,5 @@
 - name: Install SQL 2019
-  hosts: all
+  hosts: windows
   vars:
     install_with: ini
   roles:

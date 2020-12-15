@@ -1,6 +1,6 @@
 ---
 - name: create user accounts
-	hosts: all
+	hosts: windows
 	become: true
 	vars_files:
 		- secrets.yml
@@ -9,9 +9,7 @@
 			user:
 				name: "{{ username }}"
 				password: "{{ pwhash }}"
-	*
-ansible-playbook --syntax-check --ask-vault-pass create_users.yml
-	*
-echo 'password' > vault-pass
-chmod 0600 vault-pass
-	*
+
+//ansible-playbook --syntax-check --ask-vault-pass create_users.yml
+//echo 'password' > vault-pass
+//chmod 0600 vault-pass
