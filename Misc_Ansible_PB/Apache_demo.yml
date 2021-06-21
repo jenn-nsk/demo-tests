@@ -1,106 +1,106 @@
 ---
 - name: Install and run an Apache webserver
-	hosts: webserver
-	vars:
-		firewall_pkg: firewalld
-		firewall_svc: firewalld
-		web_pkg: httpd
-		web_svc: httpd
-		ssl_pkg: mod_ssl
-		httpdconf_src: files/httpd.conf
-		httpdconf_dest: /etc/httpd/conf/httpd.conf
-		htaccess_src: files/.htaccess
-		secrets_dir: /etc/httpd/secrets
-		secrets_src: files/htpasswd
-		secrets_dest: "{{ secrets_dir }}/htpasswd"
-		web_root: /var/www/html
-	tasks:
-		
-		- name: Install required packages
-			yum:
-				- "{{ web_pkg }}"
-				-	"{{ firewall_pkg }}"
-				- "{{ ssl_pkg }}"
-			state: latest
+  hosts: webserver
+  vars:
+    firewall_pkg: firewalld
+    firewall_svc: firewalld
+    web_pkg: httpd
+    web_svc: httpd
+    ssl_pkg: mod_ssl
+    httpdconf_src: files/httpd.conf
+    httpdconf_dest: /etc/httpd/conf/httpd.conf
+    htaccess_src: files/.htaccess
+    secrets_dir: /etc/httpd/secrets
+    secrets_src: files/htpasswd
+    secrets_dest: "{{ secrets_dir }}/htpasswd"
+    web_root: /var/www/html
+  tasks:
+    
+    - name: Install required packages
+      yum:
+        - "{{ web_pkg }}"
+        -	"{{ firewall_pkg }}"
+        - "{{ ssl_pkg }}"
+      state: latest
 
-		- name: configure web service
-			copy:
-				src: "{{ httpdconf_svc }}"
-				dest: "{{ httpdconf_dest "}}
-				owner: root
-				group: root
-				mode: 0644
+    - name: configure web service
+      copy:
+        src: "{{ httpdconf_svc }}"
+        dest: "{{ httpdconf_dest "}}
+        owner: root
+        group: root
+        mode: 0644
 
-		- name: secrets exist
-			file:
-				path: "{{ secrets_dir }}"
-				state: directory
-				owner: apache
-				group: apache
-				mode: 0500
+    - name: secrets exist
+      file:
+        path: "{{ secrets_dir }}"
+        state: directory
+        owner: apache
+        group: apache
+        mode: 0500
 
-		- name: htpasswd exists
-			copy:
-				src: "{{ secrets_src }}"
-				dest: "{{ secrets_dest}}"
-				owner: apache
-				group: apache
-				mode: 0400
+    - name: htpasswd exists
+      copy:
+        src: "{{ secrets_src }}"
+        dest: "{{ secrets_dest}}"
+        owner: apache
+        group: apache
+        mode: 0400
 
-		- name: .htaccess file installed in docroot
-			copy:
-				src: "{{ htaccess_src }}"
-				dest: "{{ web_root }}/.htaccess"
-				owner: apache
-				group: apache
-				mode: 0400
+    - name: .htaccess file installed in docroot
+      copy:
+        src: "{{ htaccess_src }}"
+        dest: "{{ web_root }}/.htaccess"
+        owner: apache
+        group: apache
+        mode: 0400
 
-		- name: create index.html
-			copy:
-				content: "{{ ansible_facts['fqdn'] }}
+    - name: create index.html
+      copy:
+        content: "{{ ansible_facts['fqdn'] }}
 ({{ ansible_facts['default_ipv4']['address'] }}0 has been customized by Ansible.\n"
-				dest: "{{ web_root }}/index.html"
+        dest: "{{ web_root }}/index.html"
 
-		- name: start and enable {{ firewall_svc }} service
-			service:
-				name: "{{ firewall_svc }}"
-				enabled: true
-				state: started
+    - name: start and enable {{ firewall_svc }} service
+      service:
+        name: "{{ firewall_svc }}"
+        enabled: true
+        state: started
 
-		- name: let the host and internet meet
-			firewalld:
-				service: https
-				state: enabled
-				immediate: true
-				permanent: true
+    - name: let the host and internet meet
+      firewalld:
+        service: https
+        state: enabled
+        immediate: true
+        permanent: true
 
-		- name: start and enable {{ web_svc }} service
-			service:
-				name: "{{ web_svc }}"
-				enabled: true
-				state: started
+    - name: start and enable {{ web_svc }} service
+      service:
+        name: "{{ web_svc }}"
+        enabled: true
+        state: started
 
 - name: test all the things
-	hosts: localhost
-	become: false
-	vars:
-		web_user: guest
-	vars_files:
-		- vars/secret.yml
-	tasks:
+  hosts: localhost
+  become: false
+  vars:
+    web_user: guest
+  vars_files:
+    - vars/secret.yml
+  tasks:
 
-		- name: poke and see if it pokes back
-			uri:
-				url: https://serverb.lab.example.com
-				validate_certs: no
-				force_basic_auth: yes
-				user: "{{ web_user }}"
-				password: "{{ web_pass }}"
-				return_content: yes
-				status_code: 200
-			register: auth_test
+    - name: poke and see if it pokes back
+      uri:
+        url: https://serverb.lab.example.com
+        validate_certs: no
+        force_basic_auth: yes
+        user: "{{ web_user }}"
+        password: "{{ web_pass }}"
+        return_content: yes
+        status_code: 200
+      register: auth_test
 
 - debug:
-		var: auth_test.content
-			
+    var: auth_test.content
+      
 #help meeeee
